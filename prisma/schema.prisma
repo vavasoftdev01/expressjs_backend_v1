@@ -17,9 +17,12 @@ model post {
   country   String
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model test {
-  id Int?
-
-  @@ignore
+model game {
+  id                  Int      @id @default(autoincrement())
+  type                String
+  betting_open_time   DateTime
+  betting_closed_time DateTime
+  results             Json?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime
 }
