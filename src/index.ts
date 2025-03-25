@@ -5,11 +5,10 @@ import { graphqlHTTP } from "express-graphql";
 import { mergeSchemas } from "@graphql-tools/schema";
 import { postSchema } from "./graphql/posts";
 import PostDataSeeder from "./seeder/postDataSeeder";
-import http from "http"; // Importing http to create a server
-import { Server as SocketServer } from "socket.io"; // Import Socket.IO
+import http from "http";
 import Api from "./http/api";
+import createSocketServer from "./socketio/createSocketServer";
 
-// Load environment variables from .env file
 dotenv.config();
 const prisma = new PrismaClient();
 
@@ -64,45 +63,11 @@ app.use(
   })
 );
 
-// Start the API server and listen on `apiPort`
-const server = http.createServer(app);
-
 // Start API server
+const server = http.createServer(app);
 server.listen(apiPort, () => {
   console.log(`[API server]: Server is running at http://localhost:${apiPort}`);
 });
 
-// Create a separate Socket.IO server on `socketPort`
-const io = new SocketServer(+socketPort); // Listening on the defined socket port
-
-// Socket.IO connection handling
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-
-  // Example: Listen for messages on Socket.IO
-  socket.on("message", (msg) => {
-    console.log("Message received:", msg);
-    // Broadcast the message to all clients
-    io.emit("message", msg);
-  });
-
-  // Handle user disconnection
-  socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
-  });
-});
-
-// Log that the Socket.IO server is running
-console.log(`[Socket.IO server]: Server is running at http://localhost:${socketPort}`);
-
-// {
-//   "query": "query { allPosts { id title content address country createdAt updatedAt } }"
-// }
-
-// {
-//   "query": "query { postsByCountry(country: \"800\") { id title content address country createdAt updatedAt } }"
-// }
-
-// {
-//   "query": "query { postById(id: 1661) { id title content address country createdAt updatedAt } }"
-// }
+// Start SocketIO server
+createSocketServer(+socketPort);
